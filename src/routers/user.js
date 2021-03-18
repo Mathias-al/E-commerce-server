@@ -121,11 +121,7 @@ router.post('/register', async (req, res) => {
      try{
       req.user.tokens = req.user.tokens
       .filter(token=>token.token !== req.token ) 
-<<<<<<< HEAD
                            
-=======
-                             
->>>>>>> af4eb44... first commit
      await req.user.save()
 
      res.status(200).send()
@@ -494,9 +490,4 @@ router.post('/cart/deleteMany', auth , async(req, res)=> {
     res.status(400).send({msg:e.message})
   }
 })
-<<<<<<< HEAD
 module.exports = router
-=======
-
-module.exports = router
->>>>>>> af4eb44... first commit
