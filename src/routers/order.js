@@ -21,22 +21,8 @@ router.post('/create_order', auth ,async(req, res)=> {
         
         await order.save()
 
-        //get cart's items
+        //get isChecked items
         const cartItems = order.order_item
-
-        //if there's only one item in the cart
-        const qty = cartItems[0].qty
-
-        if( cartItems.length === 1 ) {
-            const product = await Product.findOne({ 
-                productId : cartItems[0].productId 
-            })     
-            product.stock = product.stock - qty
-            product.sales = product.sales + qty
-            await product.save()     
-        }
-
-        //if there's more than one item, then find those products
         const idBatch = (cartItems.map( item=> item.productId ))
         const products = await Product.find({
                 productId:{
@@ -65,8 +51,10 @@ router.post('/create_order', auth ,async(req, res)=> {
        //and add the new one into modal
         await Product.insertMany(products)
 
-        //clear cart
-        req.user.cartList = ''
+        //remove checkout items
+        req.user.cartList = req.user.cartList.filter(i=> {
+          return  !products.find(item=> item.productId === i.productId)
+        })
         await req.user.save()
 
         res.status(201).send({msg:'success'})

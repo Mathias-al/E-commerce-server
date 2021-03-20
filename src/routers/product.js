@@ -81,8 +81,8 @@ router.patch('/product/modify', auth , async(req, res)=> {
 })
 
 //get productList by category
-router.post('/product/category/list', async(req, res) => {
-    const { category } = req.body
+router.get('/product/list/category', async(req, res) => {
+    const  category  = req.query.cat
     try {
         const productList = await Product.find( { category } ) 
         console.log(productList)
@@ -94,6 +94,14 @@ router.post('/product/category/list', async(req, res) => {
     }catch(e) {
         res.status(400).send({msg:e.message})
     }
+})
+//get all products 
+router.get('/products/all', async (req,res)=> {
+    const allProduct = await Product.find({}) 
+     res.status(200).send({
+         msg:'success',
+         allProduct
+     })
 })
 //get a product by productId
 router.post('/product/detail', async(req, res)=> {
