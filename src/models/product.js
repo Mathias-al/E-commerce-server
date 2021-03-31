@@ -14,10 +14,7 @@ const productSchema =new mongoose.Schema({
     availability:String,
     sales:Number,
     qty:Number,
-    review: {
-        ratingValue: Number,
-        bestRating: Number
-    }
+    isChecked:Boolean
 },{
     timestamps:true  
 })

@@ -58,22 +58,21 @@ router.delete('/product/deleteMany', auth , async(req, res)=> {
     
 })
 //modify product
-router.patch('/product/modify', auth , async(req, res)=> {
+router.patch('/product/modify', auth, async(req, res)=> {
     const { productUpdate } = req.body
     const { productId } = productUpdate
     try {
-        const product = await Product.findOne( { productId } )
+         const product = await Product.findOne( { productId } )
        
         //Extract each property in productUpdate(Object) and convert it to the array.
         const updates = Object.keys( productUpdate )
         
         updates.forEach(update=> 
             product[update] = productUpdate[update] 
-            )
-        
-        await  product.save()
-
-        res.status(200).send({msg:"Modify successfully!"})
+            )     
+        res.status(200).send({
+            msg:"success",         
+        })
 
     }catch(e) {
         res.status(400).send({msg:e.message})
@@ -161,12 +160,12 @@ router.post('/product/subCategory', async(req, res)=> {
 router.get('/product/newest', async(req, res)=> {
     try {
         const now = new Date().toISOString()
-        const reduceSevenDay = new Date().setDate(new Date().getDate()-2)
-        const  sevenAgo = new Date(reduceSevenDay).toISOString()
+        const reduceTwoDay = new Date().setDate(new Date().getDate()-2)
+        const  TwoDayAgo = new Date(reduceTwoDay).toISOString()
         const products =await Product.find({
             createdAt:{
                 $lt:now,
-                $gt:sevenAgo
+                $gt:TwoDayAgo
             }
         }).limit(6)
      

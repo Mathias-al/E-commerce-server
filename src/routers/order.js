@@ -1,4 +1,5 @@
 const express =require('express')
+const { now } = require('mongoose')
 const router =new express.Router()
 const auth =require('../middleware/auth')
 const Order = require('../models/order')
@@ -9,7 +10,7 @@ router.post('/create_order', auth ,async(req, res)=> {
     try {
         //new order
         const order = new Order(req.body.orderDetails)
-
+        //create order ID
         const random1 = Math.floor(Math.random() * 10);
         const random2 = Math.floor(Math.random() * 10);
         const Id = `${ random1 }${Date.now()}${ random2 }`
@@ -19,6 +20,13 @@ router.post('/create_order', auth ,async(req, res)=> {
         order.email = req.user.email 
         order.userId = req.user.userId
         
+        if(order.payment_method === 'paypal') {
+            order.paid_date = '-'
+            order.payment_status = 'Unpaid'
+        }
+        if(order.payment_method === 'credit') {
+            order.paid_date = new Date()
+        }
         await order.save()
 
         //get isChecked items

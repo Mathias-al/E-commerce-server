@@ -34,13 +34,13 @@ router.get('/captcha', async(req, res)=> {
 
 //log in
 router.post('/login', async (req, res)=>{
-  const { email, password,captchaToken,captchaText  } = req.body
+  const { email, password,} = req.body
   try {
-     const decoded = jwt.verify( captchaToken, process.env.JWT_SECRET)
+    //  const decoded = jwt.verify( captchaToken, process.env.JWT_SECRET)
 
-     if(decoded.text !== captchaText) {
-        throw new Error('Wrong captcha')
-      }
+    //  if(decoded.text !== captchaText) {
+    //     throw new Error('Wrong captcha')
+    //    }
 
      //method will throw error
      const user = await User.findByCredentials(email, password)
@@ -197,8 +197,8 @@ router.post('/forgot-password', async (req, res) => {
       throw new Error("No user with that email!")
    } 
 
-   const token = jwt.sign( {_id: user._id}, process.env.JWT_SECRET, {expiresIn: '20m'} )
-   const link = `http://${req.headers.host}/reset-password/${token}`;
+   const token = jwt.sign( {_id: user._id}, process.env.JWT_SECRET, {expiresIn: '1d'} )
+   const link = `http://localhost:8080/#/reset-pass/${token}`;
    
    sendResetPasswordLink(email,link)
 
@@ -231,18 +231,21 @@ router.post('/reset-password/:token', async (req, res) => {
      }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
+    
     const user =await User.findOne( { _id: decoded._id } )
-
+    
     if(!user) {
       throw new Error("User does not exist")
    } 
 
-   user.password =await bcrypt.hash(password ,10)
+   user.password = password 
 
    await user.save()
-
-   res.send({msg:'Reset password successfully!'})
+   
+   res.status(200).send({
+      msg:'Reset password successfully!',
+      p:user.password
+    })
 
   }catch(e) {
     res.status(400).send({
@@ -311,28 +314,19 @@ router.post('/user/password-modify', auth ,async (req, res) => {
 })
 
 // add/remove product to the favorite list
-router.post('/user/favlist/add_remove', auth , async (req, res) => {
+router.post('/user/add/favlist', auth , async (req, res) => {
   const { productId } = req.body
     try {
-      const new_product = Product.findOne( {productId} )
-
-      /*If this product does not in the favList,
-      find the product by Id in the Product Modal and add it to the favlist.
-       If product already in the favList, remove it.
-      */
-       const index = req.user.favList.findIndex(product=> product.new_product.productId === productId)
-
-       //if can not find the Id
-       if(index === -1) { 
-        req.user.favList.push( {new_product} ) 
-       } else if (index !== -1 ) { 
-        //if find the same Id
-        req.user.favList = req.user.favList.filter(product=> product.new_product.productId !== productId)
-         }    
+      const item = await Product.find( { productId } )
+      console.log(item[0])// item = array of object
+    
+      req.user.favList.push(item[0]) 
         
-       await req.user.save()   
-       res.status(200).send({
-          msg:'Success!'
+      await req.user.save() 
+
+      res.status(200).send({
+          msg:'success',
+          favList:req.user.favList
           })      
       }catch(e) {
         res.status(400).send({msg:e.message})          
@@ -340,15 +334,16 @@ router.post('/user/favlist/add_remove', auth , async (req, res) => {
     })  
      
 //delete favorite product
-router.post('/user/favlist/delete', auth , async (req, res) => {
+router.post('/user/delete/favlist', auth , async (req, res) => {
   const { productId } = req.body
   try {
-    req.user.favList = req.user.favList.filter(product=> product.newproduct.productId !== productId)
+    req.user.favList = req.user.favList.filter(product=> product.productId !== productId)
          
     await req.user.save()
 
     res.status(200).send({
-     msg:'Delete successfully!'
+     msg:'success',
+     favList:req.user.favList
     })
 
   }catch(e) {
@@ -373,18 +368,16 @@ router.get('/admin/allUser', auth , async(req, res)=> {
 
 //get cartlist
 router.get('/cartList', auth ,  async (req, res)=> {
-  const { cartList } = req.user
+  const app  = req.user.cartList
   res.status(200).send({
     msg:'success',
-    cartList,
-    count:cartList.length
-
+    app
   })
 })
 
 //add product to cart 
 router.post('/addToCart', auth , async(req, res)=> {
-     const { productId , qty } = req.body.cart 
+     const { productId , qty } = req.body
   try {
      const product = await Product.findOne( { productId } )
      
@@ -407,36 +400,35 @@ router.post('/addToCart', auth , async(req, res)=> {
          throw new Error("Item already exists in cart!")
        }       
      }
-     req.user.save()
-     res.status(200).send({msg:'success'})
+     await req.user.save()
+     res.status(200).send({
+       msg:'success',
+       cartList:req.user.cartList
+      })
   }catch(e) {
     res.status(400).send({msg:e.message})
   }
 })
 
 
-// reduce  & increase product qty
-
-//find the target product, increase/reduce its qty,then remove the original one,and add the new one the qty's been updated into array.
-
-router.get('/cart/:productId/:operator/incAndReduce', auth , async(req ,res)=> {
-  const  productId  = req.params.productId
-  const  operator  = req.params.operator
-  try {  
-    const item = req.user.cartList.find(item=> item.productId === productId)
-    
-    operator==='increase' ? item.qty += 1 :item.qty -= 1
-    
-    const filter = req.user.cartList.filter(item=> item.productId !== productId)
-    req.user.cartList = filter
-
-    req.user.cartList.push(item)
+// Update item quantity
+router.post('/cart/product/updateQty', auth , async(req ,res)=> {
+     const  { productId , qty , cartList }  = req.body
+   try {  
+     const itemIndex = cartList.findIndex(item=> item.productId === productId)
+     
+     if( itemIndex > -1 ) {
+       const productItem =  cartList[itemIndex]
+       productItem.qty = qty
+       //cartList.set(itemIndex, productItem)   
+     }
+    req.user.cartList = cartList
 
     await req.user.save()
- 
+    
     res.status(200).send({
         msg:'success',
-        cart:req.user.cartList
+        cartList:req.user.cartList
     })
   }catch(e) {
     res.status(400).send({msg:e.message})
@@ -455,16 +447,19 @@ router.delete('/clearCart', auth , async(req, res) => {
 })
 
 //delete one product 
-router.delete('/cart/delete', auth , async(req, res)=> {
-  const { productId } = req.body
+router.post('/cart/delete', auth , async(req, res)=> {
+  const { productId,cartList } = req.body
   try {
-    const filteredProduct = req.user.cartList.filter(item=> item.productId !== productId)
+    const filteredProduct = cartList.filter(item=> item.productId !== productId)
 
     req.user.cartList = filteredProduct
 
-    req.user.save()
+    await req.user.save()
 
-    res.status(200).send({msg:'success'})
+    res.status(200).send({
+      msg:'success',
+      cartList:req.user.cartList
+    })
 
   }catch(e) {
     res.status(400).send({msg:e.message})
@@ -482,7 +477,7 @@ router.post('/cart/deleteMany', auth , async(req, res)=> {
 
     req.user.cartList = result
    
-    req.user.save();
+    await req.user.save();
 
     res.status(200).send({msg:'success'})
   
