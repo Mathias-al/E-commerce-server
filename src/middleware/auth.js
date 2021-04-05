@@ -10,9 +10,9 @@ const auth = async (req, res ,next)=>{
         
         const decoded=jwt.verify(token ,process.env.JWT_SECRET) 
           
-          const user =await User.findOne(
-            { _id: decoded._id , 'tokens.token' : token })
-
+           const user =await User.findOne(
+             { _id: decoded._id , 'tokens.token' : token })
+              
             if(!user) {
               throw new Error("User does not exist!")
           }
@@ -20,9 +20,8 @@ const auth = async (req, res ,next)=>{
          next()  
         
       }catch(e) {
-          res.status(403).send( {
-            success:"false",
-            message:"Access token has expired or does not exist!"} )
+          res.status(401).send({msg:e.message})
+                    
       }
 }
 

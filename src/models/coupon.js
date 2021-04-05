@@ -5,10 +5,6 @@ const couponSchema =new mongoose.Schema({
         required:true,
     },
     description:String,
-    individual_use:{  
-        type:String,
-        required:true,
-    },
     discount_type:{
         type:String,
         required:true
@@ -21,6 +17,7 @@ const couponSchema =new mongoose.Schema({
         type:Date,
         required:true
     },
+    
     //Number of times the coupon has been used already.
     usage_count:Number,
     //How many times the coupon can be used.

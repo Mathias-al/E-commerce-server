@@ -76,7 +76,7 @@ router.patch('/coupon/modify', auth , async(req, res)=> {
 })
 
 //apply coupon code
-router.post('/applycoupon', auth , async (req, res) => {
+router.post('/applycoupon', auth, async (req, res) => {
     const  { totalPrice, code } = req.body
     try {       
         const coupon = await Coupon.findOne({code})
@@ -92,18 +92,8 @@ router.post('/applycoupon', auth , async (req, res) => {
         if(compare < 0) {
             throw new Error('This code is already expired!')
         }
-
-    
-        //if the coupon need to be redeemed
-        if(coupon.individual_use === true) {           
-          req.user.couponList.forEach(myCoupon=> {
-              if(myCoupon.code !== coupon.code) {
-                  throw new Error("You can not use this code!")
-              }
-          })
-        }
-
-      
+   
+  
         const { minimum_amount } = coupon
 
         //if code has the consumption threshold    
@@ -120,24 +110,24 @@ router.post('/applycoupon', auth , async (req, res) => {
         res.send({
             msg:"success",
             result:{
-                finalPrice,
+                final:finalPrice,
                 discount,
                 code
             }           
         })
 
     }catch(e) {
-        res.send({msg:e.message})
+        res.status(400).send({msg:e.message})
     }   
 })
 
 //redeem coupon 
-router.get('/coupon/redeem', auth , async(req, res)=> {
+router.post('/coupon/redeem', auth , async(req, res)=> {
      const { code } = req.body
     try {
         const coupon = await Coupon.findOne( { code } )
         console.log(coupon)
-        req.user.couponList.push( { coupon } )
+        req.user.couponList.push( coupon )
 
         await req.user.save()
         

@@ -66,20 +66,21 @@ router.post('/login', async (req, res)=>{
 router.post('/getNewToken', async (req, res) => {
   try {
     //get original refreshtoken
-  const { refresh } = req.body
+   const { refresh } = req.body
    //verify user
-  const decoded = jwt.verify( refresh, process.env.JWT_SECRET)
-  
-  const user = await User.find({_id : decoded._id})
-   
-  const token = await user.generateAuthToken()
+   const decoded = jwt.verify( refresh, process.env.JWT_REFRESH_SECRET)
 
-  const refreshToken = await user.generateRefreshToken()        
+   const user =await User.findOne(
+    { _id: decoded._id })
+   
+    const token = await user.generateAuthToken()
+
+    const refreshToken = await user.generateRefreshToken()       
        
   res.status(200).send({ 
       msg:'success', 
       result: {
-        token, 
+        token,
         refreshToken
       }
     })
@@ -156,8 +157,8 @@ async (req, res)=> {
 
      //adjust image's size
      const buffer = await sharp(req.file.buffer).resize({
-     width: 350 ,
-     height: 350, 
+     width: 150,
+     height: 150, 
      position: sharp.gravity.north
     }).png().toBuffer(); //in order to save into db
     
@@ -168,22 +169,21 @@ async (req, res)=> {
      await req.user.save()  
 
      res.status(200).send({ 
-        msg:'image upload successfully!',
-        base64    
+         msg:'success',
+         base64,
+         user:req.user 
         })              
       },
        (err,req,res,next)=> {
             res.status(400).send({msg:err.message})
       })
 
-//delete avatar
-router.delete('/user/avatar', auth, async (req,res)=>{
-  req.user.avatarUpload = undefined
-  await req.user.save()
-  res.send({mag:'Delete successfully!'})
-})
-
-
+// //delete avatar
+// router.delete('/user/avatar', auth, async (req,res)=>{
+//   req.user.avatarUpload = undefined
+//   await req.user.save()
+//   res.send({mag:'Delete successfully!'})
+// })
 
 //send reset email 
 router.post('/forgot-password', async (req, res) => {
@@ -207,7 +207,7 @@ router.post('/forgot-password', async (req, res) => {
     })
 
   }catch(e) {
-    res.status(401).send({msg:e.message})
+    res.status(400).send({msg:e.message})
   }
 })
 
@@ -335,9 +335,9 @@ router.post('/user/add/favlist', auth , async (req, res) => {
      
 //delete favorite product
 router.post('/user/delete/favlist', auth , async (req, res) => {
-  const { productId } = req.body
+  const { productId, favlist } = req.body
   try {
-    req.user.favList = req.user.favList.filter(product=> product.productId !== productId)
+    req.user.favList = favlist.filter(product=> product.productId !== productId)
          
     await req.user.save()
 

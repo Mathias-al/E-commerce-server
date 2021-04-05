@@ -2,6 +2,7 @@ const express =require('express')
 const { now } = require('mongoose')
 const router =new express.Router()
 const auth =require('../middleware/auth')
+const Coupon = require('../models/coupon')
 const Order = require('../models/order')
 const Product = require('../models/product')
 
@@ -23,9 +24,11 @@ router.post('/create_order', auth ,async(req, res)=> {
         if(order.payment_method === 'paypal') {
             order.paid_date = '-'
             order.payment_status = 'Unpaid'
+            order.order_status = 'In Progress'
         }
         if(order.payment_method === 'credit') {
             order.paid_date = new Date()
+            order.order_status = 'Complete'
         }
         await order.save()
 
@@ -63,9 +66,24 @@ router.post('/create_order', auth ,async(req, res)=> {
         req.user.cartList = req.user.cartList.filter(i=> {
           return  !products.find(item=> item.productId === i.productId)
         })
-        await req.user.save()
+        //if user have used coupon 
+        if(order.discount_code) {
+            const coupon = req.user.couponList.find(i=> i.code ===discount_code)
+            if(coupon) {
+                coupon.usage_count = 1 
+            }
+            const filter = req.user.couponList.filter(i=> i.code!== coupon.code)
 
-        res.status(201).send({msg:'success'})
+            req.user.couponList = filter
+
+            req.user.couponList.push(coupon)
+
+            await req.user.save()
+        }  
+        res.status(201).send({
+            msg:'success',
+            couponList: req.user.couponList
+        })
     }catch(e) {
         res.status(400).send({msg:e.message})
     }

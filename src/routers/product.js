@@ -104,14 +104,14 @@ router.get('/products/all', async (req,res)=> {
 })
 //get a product by productId
 router.post('/product/detail', async(req, res)=> {
-    const { productId } =req.body
+    const { productId } = req.body
     try {
        const product = await Product.findOne( { productId } )
        if(!product) {
            throw new Error("Product does not exist!")
        }
        res.status(200).send({
-           msg:'Success!',
+           msg:'success',
            productDetail:product
         })
 
