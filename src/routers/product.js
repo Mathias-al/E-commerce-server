@@ -9,7 +9,7 @@ router.delete('/admin/product/delete', auth , ProductControl.deleteItem)
 router.delete('/admin/product/deleteMany', auth , ProductControl.deleteMany)
 router.patch('/admin/product/modify', auth, ProductControl.modifyItem)
 
-
+//user
 router.get('/product/list/category', ProductControl.getItemByCat)
 router.get('/products/all', ProductControl.getAllItems)
 router.post('/product/detail', ProductControl.itemDetail)

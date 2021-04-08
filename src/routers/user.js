@@ -22,6 +22,7 @@ const upload =multer({
   }
 })
 
+//user
 router.get('/captcha', UserControl.getCaptcha )
 router.post('/login', UserControl.login)
 router.post('/getNewToken', UserControl.getNewToken)
