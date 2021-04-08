@@ -175,6 +175,19 @@ class OrderControl {
                 res.status(400).send({msg:e.message})
             }
         
-    }
+      }
+      async getOrderDetail(req, res) {
+        const { orderId } = req.body
+        try {
+            const order = await Order.findOne( { orderId } )
+
+            res.status(200).send({
+                msg:'success',
+                order
+            })
+        }catch(e) {       
+            res.status(400).send({msg:e.message})
+        }
+      } 
 }
 module.exports = new OrderControl()

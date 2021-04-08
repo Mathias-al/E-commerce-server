@@ -8,6 +8,7 @@ router.post('/create_order', auth , OrderControl.createOrder)
 router.patch('/user/order/modify', auth , OrderControl.modifyOrder)
 router.post('/order/cancel', auth , OrderControl.cancelOrder)
 router.get('/user/orderList', auth , OrderControl.getUserOrders)
+router.post('/order/detail', auth , OrderControl.getOrderDetail )
 
 //admin
 router.patch('/admin/order/modify', auth , OrderControl.adminModifyOrder)
