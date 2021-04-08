@@ -10,7 +10,7 @@ const Product = require('../models/product')
 router.post('/create_order', auth ,async(req, res)=> {
     try {
         //new order
-        const order = new Order(req.body.orderDetails)
+        const order = new Order(req.body)
         //create order ID
         const random1 = Math.floor(Math.random() * 10);
         const random2 = Math.floor(Math.random() * 10);
@@ -20,9 +20,9 @@ router.post('/create_order', auth ,async(req, res)=> {
         order.name = req.user.name
         order.email = req.user.email 
         order.userId = req.user.userId
-        
+
         if(order.payment_method === 'paypal') {
-            order.paid_date = '-'
+            
             order.payment_status = 'Unpaid'
             order.order_status = 'In Progress'
         }
@@ -66,23 +66,29 @@ router.post('/create_order', auth ,async(req, res)=> {
         req.user.cartList = req.user.cartList.filter(i=> {
           return  !products.find(item=> item.productId === i.productId)
         })
+        await req.user.save()
+
+
         //if user have used coupon 
-        if(order.discount_code) {
-            const coupon = req.user.couponList.find(i=> i.code ===discount_code)
+        if(order.discount_code) {        
+            const coupon = req.user.couponList.find(i=> i.code === order.discount_code)
+            
             if(coupon) {
                 coupon.usage_count = 1 
             }
             const filter = req.user.couponList.filter(i=> i.code!== coupon.code)
-
+            
             req.user.couponList = filter
 
             req.user.couponList.push(coupon)
-
+            
             await req.user.save()
         }  
         res.status(201).send({
             msg:'success',
-            couponList: req.user.couponList
+            cartList:req.user.cartList,
+            order,
+            user:req.user
         })
     }catch(e) {
         res.status(400).send({msg:e.message})
@@ -147,7 +153,11 @@ router.get('/admin/orderList', auth , async(req ,res)=> {
 //get orderlist(user)
 router.get('/user/orderList', auth , async(req ,res)=> {
     const orderList =await  Order.find({ userId: req.user.userId })
-    res.status(200).send(orderList)
+    res.status(200).send({
+        msg:'success',
+        length:orderList.length,
+        orderList
+    })
 })
 
 //delete order

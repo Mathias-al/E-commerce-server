@@ -12,7 +12,7 @@ router.post('/create-coupon', auth  , async(req, res) => {
            msg:'Coupon has been created !'
         })
     }catch(e) {
-        res.send(400).send({msg:e.message})
+        res.status(400).send({msg:e.message})
     }
 })
 
