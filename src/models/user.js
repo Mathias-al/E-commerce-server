@@ -46,7 +46,7 @@ const userSchema =new mongoose.Schema({
         }
     }],
     avatarDefault: { 
-        default:'https://upload.cc/i1/2021/01/23/4zQckI.png',
+        default:'https://upload.cc/i1/2021/04/08/yGs8hR.png',
         type:String
     },
     avatarUpload:{

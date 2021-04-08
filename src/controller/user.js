@@ -228,10 +228,17 @@ class UserControl {
       async userInfoModify(req, res) {
         try {
           const { name, email, county, township , road } =req.body
-        
+          
+          if(email) {
+            const user =await User.findOne( { email }  ) 
+            if(user) {
+              throw new Error("duplicate email!")
+            }
+            req.user.email =email
+          }
           req.user.name =name
-          req.user.email =email
-     
+          
+          
           if( county && township && road ) {
             const address = `${county}${township}${road}`;
             req.user.address = address 
@@ -239,10 +246,14 @@ class UserControl {
      
          await req.user.save()
      
-         res.status(200).send({msg:'success'})
+         res.status(200).send({
+            msg:'success',
+            user:req.user,
+            address:req.user.address
+          })
            
         }catch(e) {
-          res.send({msg:e.message})
+          res.status(400).send({msg:e.message})
         }
          
      }

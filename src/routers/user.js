@@ -7,7 +7,7 @@ const multer = require('multer')
 //upload avatar
 const upload =multer({
   limits:{
-    fileSize:500000
+    fileSize:9000000
   },
   filename(req, file, cb) {
     cb(undefined, file.filename+'-'+ Date.now())
