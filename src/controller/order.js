@@ -14,17 +14,10 @@ class OrderControl {
             order.orderId = Id         
             order.name = req.user.name
             order.email = req.user.email 
-            order.userId = req.user.userId
-    
-            if(order.payment_method === 'paypal') {
-                
-                order.payment_status = 'Unpaid'
-                order.order_status = 'In Progress'
-            }
-            if(order.payment_method === 'credit') {
-                order.paid_date = new Date()
-                order.order_status = 'Complete'
-            }
+            order.userId = req.user.userId         
+            order.payment_date = new Date()
+            order.order_status = 'COMPLETED'
+            
             await order.save()
     
             //get isChecked items

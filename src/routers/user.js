@@ -9,9 +9,6 @@ const upload =multer({
   limits:{
     fileSize:9000000
   },
-  filename(req, file, cb) {
-    cb(undefined, file.filename+'-'+ Date.now())
-  } , 
   fileFilter(req, file, cb) {
     if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       return cb(new Error("File must be jpg,jpeg or png"))

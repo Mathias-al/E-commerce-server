@@ -6,6 +6,7 @@ const validator = require('validator')
 const jwt =require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const { sendResetPasswordLink  } = require('../email/account')
+const multer = require('multer')
 
 
 class UserControl {
@@ -29,13 +30,13 @@ class UserControl {
         })
     }
     async login(req, res) {
-        const { email, password,} = req.body
+        const { email, password,captchaToken,captchaText} = req.body
         try {
-          //  const decoded = jwt.verify( captchaToken, process.env.JWT_SECRET)
+           const decoded = jwt.verify( captchaToken, process.env.JWT_SECRET)
       
-          //  if(decoded.text !== captchaText) {
-          //     throw new Error('Wrong captcha')
-          //    }
+           if(decoded.text !== captchaText) {
+              throw new Error('Wrong captcha')
+             }
       
            //method will throw error
            const user = await User.findByCredentials(email, password)
@@ -71,11 +72,9 @@ class UserControl {
           const refreshToken = await user.generateRefreshToken()       
              
         res.status(200).send({ 
-            msg:'success', 
-            result: {
-              token,
-              refreshToken
-            }
+            msg:'success',          
+            token,
+            refreshToken
           })
         }catch(e) {
           res.status(401).send({msg:e.message})
@@ -227,7 +226,7 @@ class UserControl {
       }
       async userInfoModify(req, res) {
         try {
-          const { name, email, county, township , road } =req.body
+          const { name, email, county, district , road } =req.body
           
           if(email) {
             const user =await User.findOne( { email }  ) 
@@ -239,9 +238,10 @@ class UserControl {
           req.user.name =name
           
           
-          if( county && township && road ) {
-            const address = `${county}${township}${road}`;
-            req.user.address = address 
+          if( county && district && road ) {
+            req.user.county = county 
+            req.user.district = district 
+            req.user.road = road 
          }
      
          await req.user.save()
@@ -249,7 +249,9 @@ class UserControl {
          res.status(200).send({
             msg:'success',
             user:req.user,
-            address:req.user.address
+            county:req.user.county,
+            district:req.user.district,
+            road:req.user.road
           })
            
         }catch(e) {
@@ -264,9 +266,9 @@ class UserControl {
      
            await req.user.save()
            
-           res.send({msg:'modify successfully!'})
+           res.status(200).send({msg:'success'})
         }catch(e) {
-          res.send({msg:e.message})
+          res.status(400).send({msg:e.message})
         }
      }
      async addToFav(req, res) {
@@ -324,6 +326,7 @@ class UserControl {
       }
       async addToCart(req, res) {
         const { productId , qty } = req.body
+        console.log(req)
         try {
             const product = await Product.findOne( { productId } )
             

@@ -52,7 +52,9 @@ const userSchema =new mongoose.Schema({
     avatarUpload:{
         type:Buffer
     },
-    address:String,
+    county:String,
+    district:String,
+    road:String,
     couponList: [{
         type:Object
     }],

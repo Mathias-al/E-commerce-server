@@ -16,7 +16,7 @@ const orderSchema =new mongoose.Schema({
         default:"Paid",
         type:String
     },
-    paid_date:Date,
+    payment_date:Date,
     cancel:{
         default:'Cancel',
         type:String
