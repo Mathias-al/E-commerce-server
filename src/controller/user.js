@@ -30,13 +30,13 @@ class UserControl {
         })
     }
     async login(req, res) {
-        const { email, password,captchaToken,captchaText} = req.body
+        const { email, password,captchaToken,captchaText } = req.body
         try {
-           const decoded = jwt.verify( captchaToken, process.env.JWT_SECRET)
+            const decoded = jwt.verify( captchaToken, process.env.JWT_SECRET)
       
-           if(decoded.text !== captchaText) {
-              throw new Error('Wrong captcha')
-             }
+            if(decoded.text !== captchaText) {
+               throw new Error('Wrong captcha')
+              }
       
            //method will throw error
            const user = await User.findByCredentials(email, password)
