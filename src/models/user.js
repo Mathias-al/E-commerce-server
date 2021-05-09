@@ -22,7 +22,6 @@ const userSchema =new mongoose.Schema({
         }
     },
     userId: {
-      required:true,
       type:String
     },
     password: {

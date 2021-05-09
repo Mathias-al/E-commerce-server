@@ -6,7 +6,6 @@ const validator = require('validator')
 const jwt =require('jsonwebtoken')
 const svgCaptcha = require('svg-captcha')
 const { sendResetPasswordLink  } = require('../email/account')
-const multer = require('multer')
 
 
 class UserControl {
@@ -55,6 +54,30 @@ class UserControl {
           )  
         }catch(e) {
           res.status(400).send({msg:e.message}) 
+        }
+      }
+      async googleLogin(req, res) {
+        try {
+         const { email } = req.body
+         const user = await User.findOne({email})
+         if(!user) {
+           //need email and name
+           const newUser = new User(req.body)
+           await newUser.save()
+           const token = await newUser.generateAuthToken()
+           return token
+         }
+         const token = await user.generateAuthToken()
+      
+          res.status(200).send(
+            { 
+              msg:'success', 
+              result: { token }
+            }         
+          )  
+         
+        }catch(e) {
+          res.status(400).send({msg:e.message})
         }
       }
       async getNewToken(req, res) {
