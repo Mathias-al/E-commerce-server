@@ -65,17 +65,22 @@ class UserControl {
            const newUser = new User(req.body)
            await newUser.save()
            const token = await newUser.generateAuthToken()
-           return token
-         }
-         const token = await user.generateAuthToken()
-      
+          
           res.status(200).send(
             { 
               msg:'success', 
               result: { token }
             }         
           )  
-         
+         }else {
+          const token = await user.generateAuthToken() 
+           res.status(200).send(
+            { 
+              msg:'exist user!', 
+              result: { token }
+            }         
+          )  
+         }       
         }catch(e) {
           res.status(400).send({msg:e.message})
         }
