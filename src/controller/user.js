@@ -9,6 +9,28 @@ const { sendResetPasswordLink  } = require('../email/account')
 
 
 class UserControl {
+  //login feature for react native
+   async rnLogin(req, res) {
+        const { email, password } = req.body
+        try {
+            
+           //method will throw error
+           const user = await User.findByCredentials(email, password)
+      
+           const token = await user.generateAuthToken()
+      
+           res.status(200).send(
+             { 
+               msg:'success', 
+               result: {
+                    user,
+                    token, 
+            }}
+          )  
+        }catch(e) {
+          res.status(400).send({msg:e.message}) 
+        }
+      }
     async getCaptcha(req, res) {
         const captcha = await svgCaptcha.createMathExpr({
           size:5,
