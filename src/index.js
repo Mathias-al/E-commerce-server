@@ -12,11 +12,13 @@ const userRouter =require("../src/routers/user")
 const couponRouter = require("../src/routers/coupon")
 const productRouter = require("../src/routers/product")
 const orderRouter = require("../src/routers/order")
+const gameRouter = require("../src/routers/game")
 
 app.use("/api",userRouter); 
 app.use("/api",couponRouter); 
 app.use("/api",productRouter); 
 app.use("/api",orderRouter); 
+app.use("/api",gameRouter); 
 
 app.use(function (err, req, res, next) {
     console.error(err.stack)
