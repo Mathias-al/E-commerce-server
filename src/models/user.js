@@ -129,18 +129,8 @@ userSchema.pre('save',async function(next){
     next();
 })
 
-userSchema.pre('remove',async function(next){
-    const user = this 
-   await Task.deleteMany({owner: user._id})
-    next() 
-})
 
-//virtual property
-userSchema.virtual('tasks',{
-    ref:"Task",
-    localField:'_id',
-    foreignField:'owner'
-})
+
 
 const User = mongoose.model('user',userSchema )
 module.exports = User 

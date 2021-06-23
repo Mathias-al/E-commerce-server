@@ -7,13 +7,13 @@ const auth = async (req, res ,next)=>{
          //把Bearer(類型)去掉，只要token內容
         const token = req.body.token || req.header("Authorization").replace('Bearer ', '') 
         
-        console.log(`auth拿到的token-->${token}`)
+        
         
         const decoded=jwt.verify(token ,process.env.JWT_SECRET) 
           
            const user =await User.findOne(
              { _id: decoded._id , 'tokens.token' : token })
-          console.log(`找到的user-->${user}`)
+          
             if(!user) {
               throw new Error("User does not exist!")
           }
