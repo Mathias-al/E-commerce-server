@@ -5,6 +5,7 @@ const gameSchema =new mongoose.Schema({
     productName:String,
     image:Array,
     price:Number,
+    rating:Number,
     category:String,   
     description:String,
     stock:Number,
