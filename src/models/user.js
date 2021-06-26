@@ -48,6 +48,10 @@ const userSchema =new mongoose.Schema({
         default:'https://upload.cc/i1/2021/04/08/yGs8hR.png',
         type:String
     },
+    avatarRnDefault: {
+        default:'https://upload.cc/i1/2021/06/26/q5zfGj.png',
+        type:String
+    },
     avatarUpload:{
         type:Buffer
     },
