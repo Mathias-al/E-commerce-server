@@ -1,4 +1,5 @@
 const Game = require('../models/game')
+const Order = require('../models/order')
 
 class GameControl {
     async createGame(req, res) {
