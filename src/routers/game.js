@@ -10,6 +10,7 @@ router.post('/game/addToCart',auth, GameControl.addToCart)
 router.delete('/game/removeFromCart',auth, GameControl.removeGame)
 router.post('/game/addToFav',auth, GameControl.addToFav)
 router.delete('/game/removeFromFav',auth, GameControl.removeFav)
+router.post('/game/create_order',auth,GameControl.createOrder)
 
 
 module.exports = router
