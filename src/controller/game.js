@@ -116,5 +116,49 @@ class GameControl {
           res.status(400).send({msg:e.message})      
         }
       }
+      async createOrder(req, res) {
+        try {
+            //new order
+            const order = new Order(req.body)
+            //create order ID
+            const random1 = Math.floor(Math.random() * 10);
+            const random2 = Math.floor(Math.random() * 10);
+            const Id = `${ random1 }${Date.now()}${ random2 }`
+    
+            order.orderId = Id         
+            order.name = req.user.name
+            order.email = req.user.email 
+            order.userId = req.user.userId         
+            order.payment_date = new Date()
+            order.order_status = 'COMPLETED'
+            
+            await order.save()
+    
+            req.user.cartList = []
+            await req.user.save()
+    
+            //if user have used coupon 
+            if(order.discount_code) {        
+                const coupon = req.user.couponList.find(i=> i.code === order.discount_code)
+                
+                if(coupon) {
+                    coupon.usage_count = 1 
+                }
+                const filter = req.user.couponList.filter(i=> i.code!== coupon.code)
+                
+                req.user.couponList = filter
+    
+                req.user.couponList.push(coupon)
+                
+                await req.user.save()
+            }  
+            res.status(201).send({
+                msg:'success',
+                user:req.user
+            })
+        }catch(e) {
+            res.status(400).send({msg:e.message})
+        }
+    }
 }
 module.exports = new GameControl()
